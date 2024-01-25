@@ -1,15 +1,19 @@
 package com.example.imagesave
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.imagesave.data.SearchDocument
 import com.example.imagesave.databinding.FragmentImageSearchBinding
 import com.example.imagesave.retrofit.NetWorkClient
+import com.google.android.material.internal.ViewUtils
+import com.google.android.material.internal.ViewUtils.hideKeyboard
 import kotlinx.coroutines.launch
 
 private const val ARG_PARAM1 = "param1"
@@ -47,6 +51,7 @@ class ImageSearchFragment : Fragment() {
                     val searchParam = setUpImageParameter(searchEdit)
                     communicateNetWork(searchParam)
                 }
+                binding.root.hideKeyboardInput()
             }
         }
     }
@@ -81,6 +86,14 @@ class ImageSearchFragment : Fragment() {
             "page" to "1",
             "size" to "80"
         )
+    }
+
+    /**
+     * 키보드 숨기기
+     */
+    private fun View.hideKeyboardInput() {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
     override fun onDestroyView() {
