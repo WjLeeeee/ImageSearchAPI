@@ -43,29 +43,24 @@ class ImageSearchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        with(binding) {
-            searchImage.setOnClickListener {
-                saveData()
-                val searchEdit = searchEdit.text.toString()
-                if (searchEdit.isNotBlank()) {
-                    val searchParam = setUpImageParameter(searchEdit)
-                    communicateNetWork(searchParam)
-                }
-                binding.root.hideKeyboardInput()
+        initView()
+    }
+
+    private fun initView() =with(binding) {
+        searchImage.setOnClickListener {
+            saveData()
+            val searchEdit = searchEdit.text.toString()
+            if (searchEdit.isNotBlank()) {
+                val searchParam = setUpImageParameter(searchEdit)
+                communicateNetWork(searchParam)
             }
+            binding.root.hideKeyboardInput()
         }
         loadData()
     }
 
     companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ImageSearchFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() = ImageSearchFragment()
     }
 
     /**
@@ -137,7 +132,7 @@ class ImageSearchFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        super.onDestroyView()
         _binding = null
+        super.onDestroyView()
     }
 }

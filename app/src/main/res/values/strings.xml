@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">ImageSave</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="main_tab_search">검색결과</string>
+    <string name="main_tab_keep">내 보관함</string>
+
 </resources>
