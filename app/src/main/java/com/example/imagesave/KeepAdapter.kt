@@ -1,7 +1,6 @@
 package com.example.imagesave
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -13,10 +12,9 @@ import java.time.format.DateTimeFormatter
 class KeepAdapter(val mItems: MutableList<SelectedItem>) : RecyclerView.Adapter<KeepAdapter.Holder>() {
 
     interface ItemClick {
-        fun onClick(view : View, position : Int)
+        fun onClick(item: SelectedItem)
     }
-
-    var itemClick : ItemClick? = null
+    var itemClick: ItemClick? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val binding = RecyclerItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -25,7 +23,7 @@ class KeepAdapter(val mItems: MutableList<SelectedItem>) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.itemView.setOnClickListener {
-            itemClick?.onClick(it, position)
+            itemClick?.onClick(mItems[position])
         }
         val item = mItems[position]
         Glide.with(holder.itemView.context).load(item.thumbnail).into(holder.iconImageView)

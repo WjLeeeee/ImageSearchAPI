@@ -42,6 +42,21 @@ class KeepFragment : Fragment() {
         val adapter = KeepAdapter(SelectedItem.myLikeList)
         binding.keepRecyclerView.adapter = adapter
         binding.keepRecyclerView.layoutManager = GridLayoutManager(context, 2)
+
+        /**
+         * 아이템 선택시 아이템 삭제, 어뎁터 갱신
+         */
+        adapter.itemClick = object : KeepAdapter.ItemClick {
+            override fun onClick(item: SelectedItem) {
+                val selectedThumb = item.thumbnail
+                val selectedSite = item.siteName
+                val selectedTime = item.time
+                var result = SelectedItem(selectedThumb, selectedSite, selectedTime)
+                SelectedItem.myLikeList.remove(result)
+                adapter.notifyDataSetChanged()
+            }
+        }
+
     }
 
     companion object {
@@ -54,6 +69,7 @@ class KeepFragment : Fragment() {
                 }
             }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
