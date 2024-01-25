@@ -6,7 +6,7 @@
     tools:context=".KeepFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewKeep"
+        android:id="@+id/keepRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
