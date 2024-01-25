@@ -2,6 +2,8 @@ package com.example.imagesave
 
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -14,7 +16,7 @@ import java.time.format.DateTimeFormatter
 class SearchAdapter(val mItems: MutableList<SearchDocument>) : RecyclerView.Adapter<SearchAdapter.Holder>() {
 
     interface ItemClick {
-        fun onClick(view : View, position : Int)
+        fun onClick(item: SearchDocument, position : Int)
     }
 
     var itemClick : ItemClick? = null
@@ -26,7 +28,12 @@ class SearchAdapter(val mItems: MutableList<SearchDocument>) : RecyclerView.Adap
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.itemView.setOnClickListener {  //클릭이벤트추가부분
-            itemClick?.onClick(it, position)
+            itemClick?.onClick(mItems[position], position)
+            if(holder.heart.visibility == INVISIBLE){
+                holder.heart.visibility = VISIBLE
+            } else{
+                holder.heart.visibility = INVISIBLE
+            }
         }
         val item = mItems[position]
         Glide.with(holder.itemView.context).load(item.thumbnail_url).into(holder.iconImageView)
@@ -49,5 +56,6 @@ class SearchAdapter(val mItems: MutableList<SearchDocument>) : RecyclerView.Adap
         val iconImageView = binding.iconItem
         val title = binding.textItem
         val time = binding.textItem2
+        val heart = binding.heartImage
     }
 }

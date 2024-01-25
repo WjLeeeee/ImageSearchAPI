@@ -2,6 +2,7 @@ package com.example.imagesave
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.imagesave.data.SearchDocument
+import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.FragmentImageSearchBinding
 import com.example.imagesave.retrofit.NetWorkClient
 import kotlinx.coroutines.launch
@@ -75,9 +77,33 @@ class ImageSearchFragment : Fragment() {
         val responseData = NetWorkClient.imageNetWork.getImage(authKey, param)
         items = responseData.searchDocument ?: mutableListOf()
         val adapter = SearchAdapter(items)
+
+        adapter.itemClick = object : SearchAdapter.ItemClick{
+            override fun onClick(item: SearchDocument, position: Int) {
+                handleSelectedItem(item)
+            }
+        }
+
         binding.searchRecyclerView.adapter = adapter
         binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
     }
+
+    /**
+     * 리사이클러뷰 아이템클릭시 리스트에 저장하기
+     */
+    private fun handleSelectedItem(item: SearchDocument) {
+        val selectedThumnail = item.thumbnail_url
+        val selectedSiteName = item.display_sitename
+        val selectedTime = item.datetime
+        val selectedItems = SelectedItem(selectedThumnail, selectedSiteName, selectedTime)
+        if(SelectedItem.myLikeList.contains(selectedItems)){
+            SelectedItem.myLikeList.remove(selectedItems)
+        } else{
+            SelectedItem.myLikeList.add(selectedItems)
+        }
+        Log.d("selected", "myLikeList : ${SelectedItem.myLikeList}")
+    }
+
     private fun setUpImageParameter(input: String): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
