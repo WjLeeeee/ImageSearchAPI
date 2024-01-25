@@ -12,8 +12,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.imagesave.data.SearchDocument
 import com.example.imagesave.databinding.FragmentImageSearchBinding
 import com.example.imagesave.retrofit.NetWorkClient
-import com.google.android.material.internal.ViewUtils
-import com.google.android.material.internal.ViewUtils.hideKeyboard
 import kotlinx.coroutines.launch
 
 private const val ARG_PARAM1 = "param1"
@@ -46,6 +44,7 @@ class ImageSearchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         with(binding) {
             searchImage.setOnClickListener {
+                saveData()
                 val searchEdit = searchEdit.text.toString()
                 if (searchEdit.isNotBlank()) {
                     val searchParam = setUpImageParameter(searchEdit)
@@ -54,6 +53,7 @@ class ImageSearchFragment : Fragment() {
                 binding.root.hideKeyboardInput()
             }
         }
+        loadData()
     }
 
     companion object {
@@ -67,6 +67,9 @@ class ImageSearchFragment : Fragment() {
             }
     }
 
+    /**
+     * kakao API이용해서 사진 불러오기
+     */
     private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         val responseData = NetWorkClient.imageNetWork.getImage(authKey, param)
@@ -74,9 +77,7 @@ class ImageSearchFragment : Fragment() {
         val adapter = SearchAdapter(items)
         binding.searchRecyclerView.adapter = adapter
         binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
-
     }
-
     private fun setUpImageParameter(input: String): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
@@ -94,6 +95,20 @@ class ImageSearchFragment : Fragment() {
     private fun View.hideKeyboardInput() {
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
+    }
+
+    /**
+     * sharedPreferences
+     */
+    private fun saveData() {
+        val pref = requireContext().getSharedPreferences("pref",0)
+        val edit = pref.edit()
+        edit.putString("title", binding.searchEdit.text.toString())
+        edit.apply() // 저장완료
+    }
+    private fun loadData() {
+        val pref = requireContext().getSharedPreferences("pref",0)
+        binding.searchEdit.setText(pref.getString("title",""))
     }
 
     override fun onDestroyView() {
