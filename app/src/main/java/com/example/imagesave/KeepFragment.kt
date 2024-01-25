@@ -19,7 +19,7 @@ class KeepFragment : Fragment() {
     private var param2: String? = null
     private var _binding: FragmentKeepBinding? = null
     private val binding get() = _binding!!
-    var items = mutableListOf<SelectedItem>()
+    private lateinit var keepAdapter: KeepAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,26 +37,34 @@ class KeepFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * 실시간으로 업데이트하기위해 onResume상태일때 어뎁터 초기화.
+     */
+    override fun onResume() {
+        keepAdapter = KeepAdapter(SelectedItem.myLikeList)
+        binding.keepRecyclerView.adapter = keepAdapter
+        binding.keepRecyclerView.layoutManager = GridLayoutManager(context, 2)
+        super.onResume()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = KeepAdapter(SelectedItem.myLikeList)
-        binding.keepRecyclerView.adapter = adapter
+        keepAdapter = KeepAdapter(SelectedItem.myLikeList)
+        binding.keepRecyclerView.adapter = keepAdapter
         binding.keepRecyclerView.layoutManager = GridLayoutManager(context, 2)
-
         /**
          * 아이템 선택시 아이템 삭제, 어뎁터 갱신
          */
-        adapter.itemClick = object : KeepAdapter.ItemClick {
+        keepAdapter.itemClick = object : KeepAdapter.ItemClick {
             override fun onClick(item: SelectedItem) {
                 val selectedThumb = item.thumbnail
                 val selectedSite = item.siteName
                 val selectedTime = item.time
                 var result = SelectedItem(selectedThumb, selectedSite, selectedTime)
                 SelectedItem.myLikeList.remove(result)
-                adapter.notifyDataSetChanged()
+                keepAdapter.notifyDataSetChanged()
             }
         }
-
     }
 
     companion object {

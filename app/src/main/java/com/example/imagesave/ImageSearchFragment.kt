@@ -1,5 +1,6 @@
 package com.example.imagesave
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -16,21 +17,13 @@ import com.example.imagesave.databinding.FragmentImageSearchBinding
 import com.example.imagesave.retrofit.NetWorkClient
 import kotlinx.coroutines.launch
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
 class ImageSearchFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
     private var _binding: FragmentImageSearchBinding? = null
     private val binding get() = _binding!!
     var items = mutableListOf<SearchDocument>()
+    private lateinit var searchAdapter: SearchAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
@@ -70,34 +63,25 @@ class ImageSearchFragment : Fragment() {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         val responseData = NetWorkClient.imageNetWork.getImage(authKey, param)
         items = responseData.searchDocument ?: mutableListOf()
-        val adapter = SearchAdapter(items)
+        searchAdapter = SearchAdapter(items)
 
-        adapter.itemClick = object : SearchAdapter.ItemClick{
+        searchAdapter.itemClick = object : SearchAdapter.ItemClick{
             override fun onClick(item: SearchDocument, position: Int) {
-                handleSelectedItem(item)
+                val selectedThumbnail = item.thumbnail_url
+                val selectedSiteName = item.display_sitename
+                val selectedTime = item.datetime
+                val selectedItems = SelectedItem(selectedThumbnail, selectedSiteName, selectedTime)
+                if(SelectedItem.myLikeList.contains(selectedItems)){
+                    SelectedItem.myLikeList.remove(selectedItems)
+                } else{
+                    SelectedItem.myLikeList.add(selectedItems)
+                }
             }
         }
 
-        binding.searchRecyclerView.adapter = adapter
+        binding.searchRecyclerView.adapter = searchAdapter
         binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
     }
-
-    /**
-     * 리사이클러뷰 아이템클릭시 리스트에 저장하기
-     */
-    private fun handleSelectedItem(item: SearchDocument) {
-        val selectedThumnail = item.thumbnail_url
-        val selectedSiteName = item.display_sitename
-        val selectedTime = item.datetime
-        val selectedItems = SelectedItem(selectedThumnail, selectedSiteName, selectedTime)
-        if(SelectedItem.myLikeList.contains(selectedItems)){
-            SelectedItem.myLikeList.remove(selectedItems)
-        } else{
-            SelectedItem.myLikeList.add(selectedItems)
-        }
-        Log.d("selected", "myLikeList : ${SelectedItem.myLikeList}")
-    }
-
     private fun setUpImageParameter(input: String): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
@@ -108,6 +92,7 @@ class ImageSearchFragment : Fragment() {
             "size" to "80"
         )
     }
+
 
     /**
      * 키보드 숨기기
