@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.imagesave"
-        minSdk = 24
+        minSdk = 26
         versionCode = 1
         versionName = "1.0"
 
@@ -34,6 +34,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -49,4 +50,13 @@ dependencies {
 
     //프래그먼트
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    //gson, retrofit
+    implementation ("com.google.code.gson:gson:2.10.1")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    //glide
+    implementation ("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
 }

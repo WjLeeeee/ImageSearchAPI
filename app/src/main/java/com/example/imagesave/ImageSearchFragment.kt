@@ -1,12 +1,16 @@
 package com.example.imagesave
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.example.imagesave.data.SearchDocument
 import com.example.imagesave.databinding.FragmentImageSearchBinding
+import com.example.imagesave.retrofit.NetWorkClient
+import kotlinx.coroutines.launch
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -15,9 +19,9 @@ class ImageSearchFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-    private var _binding: FragmentImageSearchBinding?= null
+    private var _binding: FragmentImageSearchBinding? = null
     private val binding get() = _binding!!
-
+    var items = mutableListOf<SearchDocument>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -25,26 +29,26 @@ class ImageSearchFragment : Fragment() {
             param2 = it.getString(ARG_PARAM2)
         }
     }
-    data class MyItem(
-        val aIcon: Int,
-        val aName: String,
-        val aAge: String
-    )
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentImageSearchBinding.inflate(inflater, container, false)
-        val dataList = mutableListOf<MyItem>()
-        dataList.add(MyItem(R.drawable.ic_launcher_foreground, "Bella", "1"))
-        dataList.add(MyItem(R.drawable.ic_launcher_foreground, "Charlie", "2"))
-        dataList.add(MyItem(R.drawable.ic_launcher_foreground, "Daisy", "1.5"))
-        dataList.add(MyItem(R.drawable.ic_launcher_foreground, "Duke", "1"))
-        val adapter = MyAdapter(dataList)
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = GridLayoutManager(context, 2)
-
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        with(binding) {
+            searchImage.setOnClickListener {
+                val searchEdit = searchEdit.text.toString()
+                if (searchEdit.isNotBlank()) {
+                    val searchParam = setUpImageParameter(searchEdit)
+                    communicateNetWork(searchParam)
+                }
+            }
+        }
     }
 
     companion object {
@@ -57,6 +61,28 @@ class ImageSearchFragment : Fragment() {
                 }
             }
     }
+
+    private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
+        val authKey = "KakaoAK ${Contract.API_KEY}"
+        val responseData = NetWorkClient.imageNetWork.getImage(authKey, param)
+        items = responseData.searchDocument ?: mutableListOf()
+        val adapter = SearchAdapter(items)
+        binding.searchRecyclerView.adapter = adapter
+        binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
+
+    }
+
+    private fun setUpImageParameter(input: String): HashMap<String, String> {
+        val authKey = "KakaoAK ${Contract.API_KEY}"
+        return hashMapOf(
+            "Authorization" to authKey,
+            "query" to input,
+            "sort" to "recency",
+            "page" to "1",
+            "size" to "80"
+        )
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

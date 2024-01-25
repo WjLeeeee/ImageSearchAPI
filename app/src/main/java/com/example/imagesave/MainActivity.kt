@@ -1,11 +1,18 @@
 package com.example.imagesave
 
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.TextUtils.replace
+import android.util.Base64
+import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import com.example.imagesave.ImageSearchFragment
 import com.example.imagesave.databinding.ActivityMainBinding
+import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 
 class MainActivity : AppCompatActivity(){
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
