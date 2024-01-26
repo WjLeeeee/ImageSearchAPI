@@ -2,12 +2,7 @@ package com.example.imagesave.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
-import androidx.viewpager2.widget.ViewPager2
-import com.example.imagesave.ImageSearchFragment
-import com.example.imagesave.KeepFragment
-import com.example.imagesave.R
+import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 

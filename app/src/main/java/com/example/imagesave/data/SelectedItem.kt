@@ -7,9 +7,10 @@ import kotlinx.android.parcel.Parcelize
 data class SelectedItem(
     val thumbnail:String,
     val siteName:String,
-    val time:String
+    val time:String,
+
 ): Parcelable{
     companion object{
-        val myLikeList = mutableListOf<SelectedItem>()
+        var myLikeList = mutableListOf<SelectedItem>()
     }
 }

@@ -3,8 +3,8 @@ package com.example.imagesave.main
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.example.imagesave.ImageSearchFragment
-import com.example.imagesave.KeepFragment
+import com.example.imagesave.ImageSearchFragment.ImageSearchFragment
+import com.example.imagesave.KeepFragment.KeepFragment
 import com.example.imagesave.R
 
 class MainViewPagerAdapter(

@@ -22,5 +22,6 @@ data class SearchDocument(
     val height: Int,
     val image_url: String,
     val thumbnail_url: String,
-    val width: Int
+    val width: Int,
+    var isLike: Boolean = false
 )
