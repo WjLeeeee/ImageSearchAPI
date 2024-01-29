@@ -100,7 +100,7 @@ class ImageSearchFragment : Fragment() {
         binding.searchRecyclerView.adapter = searchAdapter
         searchAdapter.notifyDataSetChanged()
         searchAdapter.itemClick = object : SearchAdapter.ItemClick {
-            override fun onClick(item: CombinedSearchItem, position: Int) {
+            override fun onClick(item: CombinedSearchItem) {
                 val selectedThumbnail:String
                 val selectedSiteName:String
                 val selectedTime:String
@@ -126,6 +126,8 @@ class ImageSearchFragment : Fragment() {
                 } else {
                     SelectedItem.myLikeList.add(selectedItems)
                 }
+                Log.d("ImageSearchFragment", "데이터는 잘 들어갈까 : ${SelectedItem.myLikeList}")
+
             }
 
         }

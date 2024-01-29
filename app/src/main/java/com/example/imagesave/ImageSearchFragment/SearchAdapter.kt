@@ -19,7 +19,7 @@ class SearchAdapter(val mItems: MutableList<CombinedSearchItem>) :
     RecyclerView.Adapter<SearchAdapter.Holder>() {
 
     interface ItemClick {
-        fun onClick(item: CombinedSearchItem, position: Int)
+        fun onClick(item: CombinedSearchItem)
     }
 
     var itemClick: ItemClick? = null
@@ -32,7 +32,7 @@ class SearchAdapter(val mItems: MutableList<CombinedSearchItem>) :
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         holder.itemView.setOnClickListener {  //클릭이벤트추가부분
-            itemClick?.onClick(mItems[position], position)
+            itemClick?.onClick(mItems[position])
             if (holder.heart.visibility == INVISIBLE) {
                 holder.heart.visibility = VISIBLE
             } else {
