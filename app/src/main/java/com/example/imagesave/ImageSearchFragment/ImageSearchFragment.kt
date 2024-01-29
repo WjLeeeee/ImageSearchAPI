@@ -28,6 +28,7 @@ class ImageSearchFragment : Fragment() {
     private val binding get() = _binding!!
     var items = mutableListOf<CombinedSearchItem>()
     private lateinit var searchAdapter: SearchAdapter
+    private var currentPage = 1
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -59,7 +60,7 @@ class ImageSearchFragment : Fragment() {
             saveData()
             val searchEdit = searchEdit.text.toString()
             if (searchEdit.isNotBlank()) {
-                val searchParam = setUpImageParameter(searchEdit)
+                val searchParam = setUpImageParameter(searchEdit, currentPage)
                 communicateNetWork(searchParam)
             }
             binding.root.hideKeyboardInput()
@@ -87,11 +88,34 @@ class ImageSearchFragment : Fragment() {
                     }
                 }
             }
+
+            /**
+             * 다음페이지 자동 검색 구현
+             */
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as GridLayoutManager
+                val visibleItemCount = layoutManager.childCount //화면에보이는 아이템개수
+                val totalItemCount = layoutManager.itemCount //어뎁터에설정된 전체아이템개수
+                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition() //현재화면에 첫번째로보이는 아이템의 포지션
+                val isLastItemVisible = firstVisibleItemPosition + visibleItemCount >= totalItemCount //마지막아이템이 화면에 보이는지
+                if (isLastItemVisible) {
+                    loadNextPage()
+                }
+            }
         })
         floatingBtn.setOnClickListener {
             searchRecyclerView.smoothScrollToPosition(0)
         }
         loadData()
+    }
+    private fun loadNextPage(){
+        currentPage++
+        val searchEdit = binding.searchEdit.text.toString()
+        if (searchEdit.isNotBlank()) {
+            val searchParam = setUpImageParameter(searchEdit, currentPage)
+            communicateNetWork(searchParam)
+        }
     }
 
     /**
@@ -163,13 +187,13 @@ class ImageSearchFragment : Fragment() {
         }
     }
 
-    private fun setUpImageParameter(input: String): HashMap<String, String> {
+    private fun setUpImageParameter(input: String, page:Int): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
             "Authorization" to authKey,
             "query" to input,
             "sort" to "recency",
-            "page" to "1",
+            "page" to page.toString(),
             "size" to "20"
         )
     }
