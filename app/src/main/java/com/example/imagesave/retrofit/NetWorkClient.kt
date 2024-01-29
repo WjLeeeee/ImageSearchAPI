@@ -26,12 +26,12 @@ object NetWorkClient {
             .build()
     }
 
-    private val imageRetrofit = Retrofit.Builder()
+    private val combinedRetrofit = Retrofit.Builder()
         .baseUrl(Contract.SERVICE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .client(createOkHttpClient())
         .build()
 
-    val imageNetWork: NetWorkInterface = imageRetrofit.create(NetWorkInterface::class.java)
+    val combinedNetWork: NetWorkInterface = combinedRetrofit.create(NetWorkInterface::class.java)
 
 }

@@ -2,7 +2,6 @@ package com.example.imagesave.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.ActivityMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 

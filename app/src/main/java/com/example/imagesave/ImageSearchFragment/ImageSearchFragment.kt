@@ -12,18 +12,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.imagesave.Contract
-import com.example.imagesave.KeepFragment.KeepFragment
-import com.example.imagesave.KeepFragment.OnThumbnailClickListener
+import com.example.imagesave.data.CombinedSearchItem
 import com.example.imagesave.data.SearchDocument
+import com.example.imagesave.data.SearchDocumentVideo
+import com.example.imagesave.data.SearchItemType
 import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.FragmentImageSearchBinding
 import com.example.imagesave.retrofit.NetWorkClient
 import kotlinx.coroutines.launch
 
-class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
+class ImageSearchFragment : Fragment() {
     private var _binding: FragmentImageSearchBinding? = null
     private val binding get() = _binding!!
-    var items = mutableListOf<SearchDocument>()
+    var items = mutableListOf<CombinedSearchItem>()
     private lateinit var searchAdapter: SearchAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,14 +48,6 @@ class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
     override fun onResume() {
         searchAdapter.notifyDataSetChanged()
         initView()
-//        val parentFragment = parentFragment
-//        if (parentFragment is KeepFragment) {
-//            parentFragment.thumbnailClickListener = this
-//        }
-
-        Log.d("ImageSearchFragment", "parentFragment: $parentFragment")
-
-
         super.onResume()
     }
     private fun initView() =with(binding) {
@@ -69,17 +62,10 @@ class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
         }
         loadData()
     }
-    override fun onThumbnailClick(thumbnail: String) {
-        Log.d("ImageSearchFragment", "Thumbnail Received: $thumbnail")
-        updateSearchAdapter(thumbnail)
-    }
-    private fun updateSearchAdapter(thumbnail: String) {
-        val itemToUpdate = items.find { it.thumbnail_url == thumbnail }
-        itemToUpdate?.isLike = false
-        searchAdapter.notifyItemChanged(items.indexOf(itemToUpdate))
-        Log.d("ImageSearchFragment", "Thumbnail Updated: $thumbnail")
 
-    }
+    /**
+     * 뷰페이져 적용
+     */
     companion object {
         fun newInstance() = ImageSearchFragment()
     }
@@ -90,17 +76,40 @@ class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
     @SuppressLint("NotifyDataSetChanged")
     private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
         val authKey = "KakaoAK ${Contract.API_KEY}"
-        val responseData = NetWorkClient.imageNetWork.getImage(authKey, param)
-        items = responseData.searchDocument ?: mutableListOf()
+        // 이미지 검색
+        val imageResponseData = NetWorkClient.combinedNetWork.getImageResults(authKey, param)
+        imageResponseData.searchDocument?.let {
+            items.addAll(it.map { CombinedSearchItem(it, SearchItemType.IMAGE) })
+        }
+        // 동영상 검색
+        val videoResponseData = NetWorkClient.combinedNetWork.getVideoResults(authKey, param)
+        videoResponseData.searchDocument?.let {
+            items.addAll(it.map { CombinedSearchItem(it, SearchItemType.VIDEO) })
+        }
         searchAdapter = SearchAdapter(items)
         binding.searchRecyclerView.adapter = searchAdapter
         searchAdapter.notifyDataSetChanged()
         searchAdapter.itemClick = object : SearchAdapter.ItemClick {
-            override fun onClick(item: SearchDocument, position: Int) {
-                val selectedThumbnail = item.thumbnail_url
-                val selectedSiteName = item.display_sitename
-                val selectedTime = item.datetime
-                item.isLike = !item.isLike
+            override fun onClick(item: CombinedSearchItem, position: Int) {
+                val selectedThumbnail:String
+                val selectedSiteName:String
+                val selectedTime:String
+                when(item.itemType){
+                    SearchItemType.IMAGE -> {
+                        val result = item.searchItem as SearchDocument
+                        selectedThumbnail = result.thumbnail_url
+                        selectedSiteName = result.display_sitename
+                        selectedTime = result.datetime
+                        result.isLike = !result.isLike
+                    }
+                    SearchItemType.VIDEO -> {
+                        val result = item.searchItem as SearchDocumentVideo
+                        selectedThumbnail = result.thumbnail
+                        selectedSiteName = result.title
+                        selectedTime = result.datetime
+                        result.isLike = !result.isLike
+                    }
+                }
                 val selectedItems = SelectedItem(selectedThumbnail, selectedSiteName, selectedTime)
                 if (SelectedItem.myLikeList.contains(selectedItems)) {
                     SelectedItem.myLikeList.remove(selectedItems)
@@ -108,6 +117,7 @@ class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
                     SelectedItem.myLikeList.add(selectedItems)
                 }
             }
+
         }
     }
     private fun setUpImageParameter(input: String): HashMap<String, String> {
@@ -117,7 +127,7 @@ class ImageSearchFragment : Fragment(), OnThumbnailClickListener {
             "query" to input,
             "sort" to "recency",
             "page" to "1",
-            "size" to "80"
+            "size" to "20"
         )
     }
 

@@ -19,8 +19,6 @@ class KeepFragment : Fragment() {
     private var _binding: FragmentKeepBinding? = null
     private val binding get() = _binding!!
     private lateinit var keepAdapter: KeepAdapter
-    var thumbnailClickListener: OnThumbnailClickListener? = null
-    private val KEY_MY_LIKE_LIST = "myLikeList"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,11 +30,10 @@ class KeepFragment : Fragment() {
     ): View? {
         _binding = FragmentKeepBinding.inflate(inflater, container, false)
         loadMyLikeList()
-        Log.d("KeepFragment", "데이터확인: ${SelectedItem.myLikeList}")
-        // 어댑터 초기화
         keepAdapter = KeepAdapter(SelectedItem.myLikeList)
         binding.keepRecyclerView.adapter = keepAdapter
         binding.keepRecyclerView.layoutManager = GridLayoutManager(context, 2)
+
         return binding.root
     }
 
@@ -58,9 +55,6 @@ class KeepFragment : Fragment() {
                 var result = SelectedItem(selectedThumb, selectedSite, selectedTime)
                 SelectedItem.myLikeList.remove(result)
                 keepAdapter.notifyDataSetChanged()
-
-                Log.d("KeepFragment", "Thumbnail Clicked: $selectedThumb")
-                thumbnailClickListener?.onThumbnailClick(selectedThumb)
             }
         }
         super.onResume()
@@ -70,19 +64,17 @@ class KeepFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
     }
     private fun saveMyLikeList() {
-        Log.d("KeepFragment", "Saving MyLikeList")
         val sharedPreferences = requireContext().getSharedPreferences("MyPreferences", 0)
         val editor = sharedPreferences.edit()
         // 데이터를 문자열로 변환하여 저장
         val jsonMyLikeList = Gson().toJson(SelectedItem.myLikeList)
-        editor.putString(KEY_MY_LIKE_LIST, jsonMyLikeList)
+        editor.putString("myLikeList", jsonMyLikeList)
         editor.apply()
     }
 
     private fun loadMyLikeList() {
-        Log.d("KeepFragment", "Loading MyLikeList")
         val sharedPreferences = requireContext().getSharedPreferences("MyPreferences", 0)
-        val jsonMyLikeList = sharedPreferences.getString(KEY_MY_LIKE_LIST, null)
+        val jsonMyLikeList = sharedPreferences.getString("myLikeList", null)
         // 저장된 데이터가 있으면 해당 데이터를 객체로 변환하여 대입
         jsonMyLikeList?.let {
             val type = object : TypeToken<List<SelectedItem>>() {}.type

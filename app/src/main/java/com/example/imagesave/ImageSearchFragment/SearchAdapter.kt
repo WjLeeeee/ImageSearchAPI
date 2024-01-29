@@ -1,23 +1,25 @@
 package com.example.imagesave.ImageSearchFragment
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.imagesave.data.CombinedSearchItem
 import com.example.imagesave.data.SearchDocument
+import com.example.imagesave.data.SearchDocumentVideo
+import com.example.imagesave.data.SearchItemType
 import com.example.imagesave.databinding.RecyclerItemBinding
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 
-class SearchAdapter(val mItems: MutableList<SearchDocument>) :
+class SearchAdapter(val mItems: MutableList<CombinedSearchItem>) :
     RecyclerView.Adapter<SearchAdapter.Holder>() {
 
     interface ItemClick {
-        fun onClick(item: SearchDocument, position: Int)
+        fun onClick(item: CombinedSearchItem, position: Int)
     }
 
     var itemClick: ItemClick? = null
@@ -38,17 +40,37 @@ class SearchAdapter(val mItems: MutableList<SearchDocument>) :
             }
         }
         val item = mItems[position]
-        Glide.with(holder.itemView.context).load(item.thumbnail_url).into(holder.iconImageView)
-        holder.title.text = item.display_sitename
-        val parsed = OffsetDateTime.parse(item.datetime)
-        val parseDate = parsed.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-        val parseTime = parsed.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-        holder.time.text = parseDate + " " + parseTime
-        if(item.isLike){
-            holder.heart.visibility = VISIBLE
-        } else{
-            holder.heart.visibility = INVISIBLE
+        when(item.itemType){
+            SearchItemType.IMAGE -> {
+                val imageItem = item.searchItem as SearchDocument
+                Glide.with(holder.itemView.context).load(imageItem.thumbnail_url).into(holder.iconImageView)
+                holder.title.text = imageItem.display_sitename
+                val parsed = OffsetDateTime.parse(imageItem.datetime)
+                val parseDate = parsed.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val parseTime = parsed.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                holder.time.text = parseDate + " " + parseTime
+                if(imageItem.isLike){
+                    holder.heart.visibility = VISIBLE
+                } else{
+                    holder.heart.visibility = INVISIBLE
+                }
+            }
+            SearchItemType.VIDEO -> {
+                val videoItem = item.searchItem as SearchDocumentVideo
+                Glide.with(holder.itemView.context).load(videoItem.thumbnail).into(holder.iconImageView)
+                holder.title.text = videoItem.title
+                val parsed = OffsetDateTime.parse(videoItem.datetime)
+                val parseDate = parsed.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val parseTime = parsed.format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                holder.time.text = parseDate + " " + parseTime
+                if(videoItem.isLike){
+                    holder.heart.visibility = VISIBLE
+                } else{
+                    holder.heart.visibility = INVISIBLE
+                }
+            }
         }
+
     }
 
     override fun getItemId(position: Int): Long {
