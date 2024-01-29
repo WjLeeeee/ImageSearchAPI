@@ -7,10 +7,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.imagesave.Contract
 import com.example.imagesave.data.CombinedSearchItem
 import com.example.imagesave.data.SearchDocument
@@ -44,13 +46,15 @@ class ImageSearchFragment : Fragment() {
         binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
         super.onViewCreated(view, savedInstanceState)
     }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun onResume() {
         searchAdapter.notifyDataSetChanged()
         initView()
         super.onResume()
     }
-    private fun initView() =with(binding) {
+
+    private fun initView() = with(binding) {
         searchImage.setOnClickListener {
             saveData()
             val searchEdit = searchEdit.text.toString()
@@ -59,6 +63,33 @@ class ImageSearchFragment : Fragment() {
                 communicateNetWork(searchParam)
             }
             binding.root.hideKeyboardInput()
+        }
+        /**
+         * 최상단으로 이동시키는 플로팅버튼
+         */
+        searchRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            val fadeIn = AlphaAnimation(0f, 1f).apply { duration = 1000 }
+            val fadeOut = AlphaAnimation(1f, 0f).apply { duration = 1000 }
+            var isTop = true
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (!searchRecyclerView.canScrollVertically(-1)
+                    && newState == RecyclerView.SCROLL_STATE_IDLE
+                ) {
+                    floatingBtn.startAnimation(fadeOut)
+                    floatingBtn.visibility = View.GONE
+                    isTop = true
+                } else {
+                    if (isTop) {
+                        floatingBtn.visibility = View.VISIBLE
+                        floatingBtn.startAnimation(fadeIn)
+                        isTop = false
+                    }
+                }
+            }
+        })
+        floatingBtn.setOnClickListener {
+            searchRecyclerView.smoothScrollToPosition(0)
         }
         loadData()
     }
@@ -90,7 +121,7 @@ class ImageSearchFragment : Fragment() {
         }
         items.shuffle()
         items.sortedByDescending {
-            when(it.itemType){
+            when (it.itemType) {
                 SearchItemType.IMAGE -> (it.searchItem as SearchDocument).datetime
                 SearchItemType.VIDEO -> (it.searchItem as SearchDocumentVideo).datetime
             }
@@ -101,10 +132,10 @@ class ImageSearchFragment : Fragment() {
         searchAdapter.notifyDataSetChanged()
         searchAdapter.itemClick = object : SearchAdapter.ItemClick {
             override fun onClick(item: CombinedSearchItem) {
-                val selectedThumbnail:String
-                val selectedSiteName:String
-                val selectedTime:String
-                when(item.itemType){
+                val selectedThumbnail: String
+                val selectedSiteName: String
+                val selectedTime: String
+                when (item.itemType) {
                     SearchItemType.IMAGE -> {
                         val result = item.searchItem as SearchDocument
                         selectedThumbnail = result.thumbnail_url
@@ -112,6 +143,7 @@ class ImageSearchFragment : Fragment() {
                         selectedTime = result.datetime
                         result.isLike = !result.isLike
                     }
+
                     SearchItemType.VIDEO -> {
                         val result = item.searchItem as SearchDocumentVideo
                         selectedThumbnail = result.thumbnail
@@ -126,12 +158,11 @@ class ImageSearchFragment : Fragment() {
                 } else {
                     SelectedItem.myLikeList.add(selectedItems)
                 }
-                Log.d("ImageSearchFragment", "데이터는 잘 들어갈까 : ${SelectedItem.myLikeList}")
-
             }
 
         }
     }
+
     private fun setUpImageParameter(input: String): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
@@ -142,7 +173,6 @@ class ImageSearchFragment : Fragment() {
             "size" to "20"
         )
     }
-
 
     /**
      * 키보드 숨기기
@@ -156,14 +186,15 @@ class ImageSearchFragment : Fragment() {
      * sharedPreferences
      */
     private fun saveData() {
-        val pref = requireContext().getSharedPreferences("pref",0)
+        val pref = requireContext().getSharedPreferences("pref", 0)
         val edit = pref.edit()
         edit.putString("title", binding.searchEdit.text.toString())
         edit.apply() // 저장완료
     }
+
     private fun loadData() {
-        val pref = requireContext().getSharedPreferences("pref",0)
-        binding.searchEdit.setText(pref.getString("title",""))
+        val pref = requireContext().getSharedPreferences("pref", 0)
+        binding.searchEdit.setText(pref.getString("title", ""))
     }
 
     override fun onDestroyView() {
