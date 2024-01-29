@@ -77,6 +77,7 @@ class ImageSearchFragment : Fragment() {
     private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         // 이미지 검색
+        items.clear()
         val imageResponseData = NetWorkClient.combinedNetWork.getImageResults(authKey, param)
         imageResponseData.searchDocument?.let {
             items.addAll(it.map { CombinedSearchItem(it, SearchItemType.IMAGE) })
