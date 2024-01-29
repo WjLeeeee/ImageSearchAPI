@@ -76,17 +76,26 @@ class ImageSearchFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged")
     private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
         val authKey = "KakaoAK ${Contract.API_KEY}"
-        // 이미지 검색
+        //기존 검색기록은 삭제
         items.clear()
+
         val imageResponseData = NetWorkClient.combinedNetWork.getImageResults(authKey, param)
+        val videoResponseData = NetWorkClient.combinedNetWork.getVideoResults(authKey, param)
+
         imageResponseData.searchDocument?.let {
             items.addAll(it.map { CombinedSearchItem(it, SearchItemType.IMAGE) })
         }
-        // 동영상 검색
-        val videoResponseData = NetWorkClient.combinedNetWork.getVideoResults(authKey, param)
         videoResponseData.searchDocument?.let {
             items.addAll(it.map { CombinedSearchItem(it, SearchItemType.VIDEO) })
         }
+        items.shuffle()
+        items.sortedByDescending {
+            when(it.itemType){
+                SearchItemType.IMAGE -> (it.searchItem as SearchDocument).datetime
+                SearchItemType.VIDEO -> (it.searchItem as SearchDocumentVideo).datetime
+            }
+        }
+
         searchAdapter = SearchAdapter(items)
         binding.searchRecyclerView.adapter = searchAdapter
         searchAdapter.notifyDataSetChanged()
