@@ -3,4 +3,6 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="floatingBtn">#E1AEAE</color>
+    <color name="editBackground">#DADFA2</color>
+    <color name="recyclerBackground">#F2F3EB</color>
 </resources>

@@ -33,6 +33,7 @@ class ImageSearchFragment : Fragment() {
     private val viewModel by lazy {
         ViewModelProvider(this)[SearchViewModel::class.java]
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -49,6 +50,7 @@ class ImageSearchFragment : Fragment() {
         searchAdapter = SearchAdapter(items)
         binding.searchRecyclerView.adapter = searchAdapter
         binding.searchRecyclerView.layoutManager = GridLayoutManager(context, 2)
+        initViewModel()
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -56,7 +58,6 @@ class ImageSearchFragment : Fragment() {
     override fun onResume() {
         searchAdapter.notifyDataSetChanged()
         initView()
-//        initViewModel()
         super.onResume()
     }
 
@@ -110,8 +111,10 @@ class ImageSearchFragment : Fragment() {
                 val layoutManager = recyclerView.layoutManager as GridLayoutManager
                 val visibleItemCount = layoutManager.childCount //화면에보이는 아이템개수
                 val totalItemCount = layoutManager.itemCount //어뎁터에설정된 전체아이템개수
-                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition() //현재화면에 첫번째로보이는 아이템의 포지션
-                val isLastItemVisible = firstVisibleItemPosition + visibleItemCount >= totalItemCount //마지막아이템이 화면에 보이는지
+                val firstVisibleItemPosition =
+                    layoutManager.findFirstVisibleItemPosition() //현재화면에 첫번째로보이는 아이템의 포지션
+                val isLastItemVisible =
+                    firstVisibleItemPosition + visibleItemCount >= totalItemCount //마지막아이템이 화면에 보이는지
                 if (isLastItemVisible) {
                     loadNextPage()
                 }
@@ -129,18 +132,19 @@ class ImageSearchFragment : Fragment() {
      */
     private fun cancleDataChange() {
         KeepFragment.myCancleList.forEach {
-            for(item in searchAdapter.mItems){
-                when(item.itemType){
+            for (item in searchAdapter.mItems) {
+                when (item.itemType) {
                     SearchItemType.IMAGE -> {
                         val searchDocument = item.searchItem as SearchDocument
-                        if(it == searchDocument.thumbnail_url){
+                        if (it == searchDocument.thumbnail_url) {
                             searchDocument.isLike = false
                             break
                         }
                     }
+
                     SearchItemType.VIDEO -> {
                         val searchDocumentVideo = item.searchItem as SearchDocumentVideo
-                        if(it == searchDocumentVideo.thumbnail){
+                        if (it == searchDocumentVideo.thumbnail) {
                             searchDocumentVideo.isLike = false
                             break
                         }
@@ -152,7 +156,7 @@ class ImageSearchFragment : Fragment() {
         searchAdapter.notifyDataSetChanged()
     }
 
-    private fun loadNextPage(){
+    private fun loadNextPage() {
         currentPage++
         val searchEdit = binding.searchEdit.text.toString()
         if (searchEdit.isNotBlank()) {
@@ -228,7 +232,7 @@ class ImageSearchFragment : Fragment() {
 //        viewModel.updateData(items)
     }
 
-    private fun setUpImageParameter(input: String, page:Int): HashMap<String, String> {
+    private fun setUpImageParameter(input: String, page: Int): HashMap<String, String> {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         return hashMapOf(
             "Authorization" to authKey,
