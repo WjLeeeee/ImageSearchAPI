@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.imagesave.Contract
+import com.example.imagesave.KeepFragment.KeepFragment
 import com.example.imagesave.data.CombinedSearchItem
 import com.example.imagesave.data.SearchDocument
 import com.example.imagesave.data.SearchDocumentVideo
@@ -120,7 +121,37 @@ class ImageSearchFragment : Fragment() {
             searchRecyclerView.smoothScrollToPosition(0)
         }
         loadData()
+        cancleDataChange()
     }
+
+    /**
+     * 취소된 데이터 갱신
+     */
+    private fun cancleDataChange() {
+        KeepFragment.myCancleList.forEach {
+            for(item in searchAdapter.mItems){
+                when(item.itemType){
+                    SearchItemType.IMAGE -> {
+                        val searchDocument = item.searchItem as SearchDocument
+                        if(it == searchDocument.thumbnail_url){
+                            searchDocument.isLike = false
+                            break
+                        }
+                    }
+                    SearchItemType.VIDEO -> {
+                        val searchDocumentVideo = item.searchItem as SearchDocumentVideo
+                        if(it == searchDocumentVideo.thumbnail){
+                            searchDocumentVideo.isLike = false
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        KeepFragment.myCancleList.clear()
+        searchAdapter.notifyDataSetChanged()
+    }
+
     private fun loadNextPage(){
         currentPage++
         val searchEdit = binding.searchEdit.text.toString()
@@ -162,9 +193,6 @@ class ImageSearchFragment : Fragment() {
                 SearchItemType.VIDEO -> (it.searchItem as SearchDocumentVideo).datetime
             }
         }
-
-        searchAdapter = SearchAdapter(items)
-        binding.searchRecyclerView.adapter = searchAdapter
         searchAdapter.notifyDataSetChanged()
         searchAdapter.itemClick = object : SearchAdapter.ItemClick {
             override fun onClick(item: CombinedSearchItem) {
@@ -197,7 +225,7 @@ class ImageSearchFragment : Fragment() {
             }
 
         }
-        viewModel.updateData(items)
+//        viewModel.updateData(items)
     }
 
     private fun setUpImageParameter(input: String, page:Int): HashMap<String, String> {

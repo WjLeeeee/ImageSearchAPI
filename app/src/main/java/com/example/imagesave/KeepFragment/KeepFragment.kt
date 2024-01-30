@@ -59,6 +59,7 @@ class KeepFragment : Fragment() {
                 val selectedThumb = item.thumbnail
                 val selectedSite = item.siteName
                 val selectedTime = item.time
+                myCancleList.add(selectedThumb)
                 var result = SelectedItem(selectedThumb, selectedSite, selectedTime)
                 SelectedItem.myLikeList.remove(result)
                 keepAdapter.notifyDataSetChanged()
@@ -95,6 +96,7 @@ class KeepFragment : Fragment() {
 
     companion object {
         fun newInstance() = KeepFragment()
+        var myCancleList = mutableListOf<String>()
     }
 
     override fun onPause() {
