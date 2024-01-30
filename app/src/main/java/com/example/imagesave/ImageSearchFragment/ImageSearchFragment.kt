@@ -3,13 +3,13 @@ package com.example.imagesave.ImageSearchFragment
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +29,9 @@ class ImageSearchFragment : Fragment() {
     var items = mutableListOf<CombinedSearchItem>()
     private lateinit var searchAdapter: SearchAdapter
     private var currentPage = 1
+    private val viewModel by lazy {
+        ViewModelProvider(this)[SearchViewModel::class.java]
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -52,7 +55,16 @@ class ImageSearchFragment : Fragment() {
     override fun onResume() {
         searchAdapter.notifyDataSetChanged()
         initView()
+//        initViewModel()
         super.onResume()
+    }
+
+    private fun initViewModel() {
+        viewModel.data.observe(viewLifecycleOwner) { newData ->
+            items.clear()
+            items.addAll(newData)
+            searchAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun initView() = with(binding) {
@@ -185,6 +197,7 @@ class ImageSearchFragment : Fragment() {
             }
 
         }
+        viewModel.updateData(items)
     }
 
     private fun setUpImageParameter(input: String, page:Int): HashMap<String, String> {
