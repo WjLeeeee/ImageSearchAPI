@@ -196,6 +196,9 @@ class ImageSearchFragment : Fragment() {
         searchAdapter.notifyDataSetChanged()
     }
 
+    /**
+     * 무한스크롤
+     */
     private fun loadNextPage() {
         currentPage++
         val searchEdit = binding.searchEdit.text.toString()
@@ -222,7 +225,7 @@ class ImageSearchFragment : Fragment() {
     /**
      * 키보드 숨기기
      */
-    private fun View.hideKeyboardInput() {
+    private fun View.hideKeyboardInput() { //UI관련된 코드이기 때문에 여기서 처리.
         val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
