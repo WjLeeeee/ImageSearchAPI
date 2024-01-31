@@ -61,10 +61,14 @@ class ImageSearchFragment : Fragment() {
         super.onResume()
     }
 
-    private fun initViewModel() {
-        viewModel.data.observe(viewLifecycleOwner) { newData ->
+    @SuppressLint("NotifyDataSetChanged")
+    private fun initViewModel() =with(viewModel){
+        searchParam.observe(viewLifecycleOwner){
+            communicateNetWork(it)
+        }
+        searchResult.observe(viewLifecycleOwner){
             items.clear()
-            items.addAll(newData)
+            items.addAll(it)
             searchAdapter.notifyDataSetChanged()
         }
     }
@@ -74,8 +78,7 @@ class ImageSearchFragment : Fragment() {
             saveData()
             val searchEdit = searchEdit.text.toString()
             if (searchEdit.isNotBlank()) {
-                val searchParam = setUpImageParameter(searchEdit, currentPage)
-                communicateNetWork(searchParam)
+                viewModel.setUpParameter(searchEdit, currentPage)
             }
             binding.root.hideKeyboardInput()
         }
@@ -125,6 +128,44 @@ class ImageSearchFragment : Fragment() {
         }
         loadData()
         cancleDataChange()
+        touchEvent()
+    }
+
+    /**
+     * 아이템 클릭시
+     */
+    private fun touchEvent() {
+        searchAdapter.itemClick = object : SearchAdapter.ItemClick {
+            override fun onClick(item: CombinedSearchItem) {
+                val selectedThumbnail: String
+                val selectedSiteName: String
+                val selectedTime: String
+                when (item.itemType) {
+                    SearchItemType.IMAGE -> {
+                        val result = item.searchItem as SearchDocument
+                        selectedThumbnail = result.thumbnail_url
+                        selectedSiteName = result.display_sitename
+                        selectedTime = result.datetime
+                        result.isLike = !result.isLike
+                    }
+
+                    SearchItemType.VIDEO -> {
+                        val result = item.searchItem as SearchDocumentVideo
+                        selectedThumbnail = result.thumbnail
+                        selectedSiteName = result.title
+                        selectedTime = result.datetime
+                        result.isLike = !result.isLike
+                    }
+                }
+                val selectedItems = SelectedItem(selectedThumbnail, selectedSiteName, selectedTime)
+                if (SelectedItem.myLikeList.contains(selectedItems)) {
+                    SelectedItem.myLikeList.remove(selectedItems)
+                } else {
+                    SelectedItem.myLikeList.add(selectedItems)
+                }
+            }
+
+        }
     }
 
     /**
@@ -160,8 +201,7 @@ class ImageSearchFragment : Fragment() {
         currentPage++
         val searchEdit = binding.searchEdit.text.toString()
         if (searchEdit.isNotBlank()) {
-            val searchParam = setUpImageParameter(searchEdit, currentPage)
-            communicateNetWork(searchParam)
+            viewModel.setUpParameter(searchEdit, currentPage)
         }
     }
 
@@ -176,71 +216,8 @@ class ImageSearchFragment : Fragment() {
      * kakao API이용해서 사진 불러오기
      */
     @SuppressLint("NotifyDataSetChanged")
-    private fun communicateNetWork(param: HashMap<String, String>) = lifecycleScope.launch() {
-        val authKey = "KakaoAK ${Contract.API_KEY}"
-        //기존 검색기록은 삭제
-        items.clear()
-
-        val imageResponseData = NetWorkClient.combinedNetWork.getImageResults(authKey, param)
-        val videoResponseData = NetWorkClient.combinedNetWork.getVideoResults(authKey, param)
-
-        imageResponseData.searchDocument?.let {
-            items.addAll(it.map { CombinedSearchItem(it, SearchItemType.IMAGE) })
-        }
-        videoResponseData.searchDocument?.let {
-            items.addAll(it.map { CombinedSearchItem(it, SearchItemType.VIDEO) })
-        }
-        items.shuffle()
-        items.sortedByDescending {
-            when (it.itemType) {
-                SearchItemType.IMAGE -> (it.searchItem as SearchDocument).datetime
-                SearchItemType.VIDEO -> (it.searchItem as SearchDocumentVideo).datetime
-            }
-        }
-        searchAdapter.notifyDataSetChanged()
-        searchAdapter.itemClick = object : SearchAdapter.ItemClick {
-            override fun onClick(item: CombinedSearchItem) {
-                val selectedThumbnail: String
-                val selectedSiteName: String
-                val selectedTime: String
-                when (item.itemType) {
-                    SearchItemType.IMAGE -> {
-                        val result = item.searchItem as SearchDocument
-                        selectedThumbnail = result.thumbnail_url
-                        selectedSiteName = result.display_sitename
-                        selectedTime = result.datetime
-                        result.isLike = !result.isLike
-                    }
-
-                    SearchItemType.VIDEO -> {
-                        val result = item.searchItem as SearchDocumentVideo
-                        selectedThumbnail = result.thumbnail
-                        selectedSiteName = result.title
-                        selectedTime = result.datetime
-                        result.isLike = !result.isLike
-                    }
-                }
-                val selectedItems = SelectedItem(selectedThumbnail, selectedSiteName, selectedTime)
-                if (SelectedItem.myLikeList.contains(selectedItems)) {
-                    SelectedItem.myLikeList.remove(selectedItems)
-                } else {
-                    SelectedItem.myLikeList.add(selectedItems)
-                }
-            }
-
-        }
-//        viewModel.updateData(items)
-    }
-
-    private fun setUpImageParameter(input: String, page: Int): HashMap<String, String> {
-        val authKey = "KakaoAK ${Contract.API_KEY}"
-        return hashMapOf(
-            "Authorization" to authKey,
-            "query" to input,
-            "sort" to "recency",
-            "page" to page.toString(),
-            "size" to "20"
-        )
+    private fun communicateNetWork(param: HashMap<String, String>) {
+        viewModel.dataFromNetwork(param)
     }
 
     /**
