@@ -1,5 +1,6 @@
 package com.example.imagesave.ImageSearchFragment
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,6 +18,8 @@ class SearchViewModel : ViewModel() {
     val searchParam: LiveData<HashMap<String, String>> get() = _searchParam
     private val _searchResult: MutableLiveData<List<CombinedSearchItem>> = MutableLiveData()
     val searchResult: LiveData<List<CombinedSearchItem>> get() = _searchResult
+    private val _loadData: MutableLiveData<String> = MutableLiveData()
+    val loadData: LiveData<String> get() = _loadData
 
 
     fun setUpParameter(input: String, page: Int) {
@@ -56,5 +59,16 @@ class SearchViewModel : ViewModel() {
         }
     }
 
+    fun saveEditData(context: Context, searchEdit:String) {
+        val pref = context.getSharedPreferences("pref", 0)
+        val edit = pref.edit()
+        edit.putString("title", searchEdit)
+        edit.apply() // 저장완료
+    }
+    fun loadData(context: Context) {
+        val pref = context.getSharedPreferences("pref", 0)
+        val loadData = pref.getString("title", "")
+        _loadData.value = loadData
+    }
 
 }

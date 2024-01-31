@@ -10,10 +10,8 @@ import android.view.animation.AlphaAnimation
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.imagesave.Contract
 import com.example.imagesave.KeepFragment.KeepFragment
 import com.example.imagesave.data.CombinedSearchItem
 import com.example.imagesave.data.SearchDocument
@@ -21,8 +19,6 @@ import com.example.imagesave.data.SearchDocumentVideo
 import com.example.imagesave.data.SearchItemType
 import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.FragmentImageSearchBinding
-import com.example.imagesave.retrofit.NetWorkClient
-import kotlinx.coroutines.launch
 
 class ImageSearchFragment : Fragment() {
     private var _binding: FragmentImageSearchBinding? = null
@@ -70,6 +66,9 @@ class ImageSearchFragment : Fragment() {
             items.clear()
             items.addAll(it)
             searchAdapter.notifyDataSetChanged()
+        }
+        loadData.observe(viewLifecycleOwner){
+            binding.searchEdit.setText(it)
         }
     }
 
@@ -232,15 +231,11 @@ class ImageSearchFragment : Fragment() {
      * sharedPreferences
      */
     private fun saveData() {
-        val pref = requireContext().getSharedPreferences("pref", 0)
-        val edit = pref.edit()
-        edit.putString("title", binding.searchEdit.text.toString())
-        edit.apply() // 저장완료
+        viewModel.saveEditData(requireContext(), binding.searchEdit.text.toString())
     }
 
     private fun loadData() {
-        val pref = requireContext().getSharedPreferences("pref", 0)
-        binding.searchEdit.setText(pref.getString("title", ""))
+        viewModel.loadData(requireContext())
     }
 
     override fun onDestroyView() {
