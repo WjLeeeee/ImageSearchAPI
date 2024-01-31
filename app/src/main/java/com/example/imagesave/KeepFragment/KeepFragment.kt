@@ -9,8 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.imagesave.data.SelectedItem
 import com.example.imagesave.databinding.FragmentKeepBinding
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+
 
 
 class KeepFragment : Fragment() {
@@ -48,9 +47,7 @@ class KeepFragment : Fragment() {
      * 실시간으로 업데이트하기위해 onResume상태일때 어뎁터 초기화.
      */
     override fun onResume() {
-        keepAdapter = KeepAdapter(SelectedItem.myLikeList)
-        binding.keepRecyclerView.adapter = keepAdapter
-        binding.keepRecyclerView.layoutManager = GridLayoutManager(context, 2)
+        keepAdapter.notifyDataSetChanged()
         /**
          * 아이템 선택시 아이템 삭제, 어뎁터 갱신
          */
@@ -71,32 +68,32 @@ class KeepFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
     }
+
+    /**
+     * 클릭해서 저장된 정보 저장하기
+     */
     private fun saveMyLikeList() {
         viewModel.saveMyLikeList(requireContext(), SelectedItem.myLikeList)
-//        val sharedPreferences = requireContext().getSharedPreferences("MyPreferences", 0)
-//        val editor = sharedPreferences.edit()
-//        // 데이터를 문자열로 변환하여 저장
-//        val jsonMyLikeList = Gson().toJson(SelectedItem.myLikeList)
-//        editor.putString("myLikeList", jsonMyLikeList)
-//        editor.apply()
     }
 
+    /**
+     * 저장된 정보 불러오기
+     */
     private fun loadMyLikeList() {
         viewModel.loadMyLikeList(requireContext())
-//        val sharedPreferences = requireContext().getSharedPreferences("MyPreferences", 0)
-//        val jsonMyLikeList = sharedPreferences.getString("myLikeList", null)
-//        // 저장된 데이터가 있으면 해당 데이터를 객체로 변환하여 대입
-//        jsonMyLikeList?.let {
-//            val type = object : TypeToken<List<SelectedItem>>() {}.type
-//            SelectedItem.myLikeList = Gson().fromJson(it, type)
-//        }
     }
 
+    /**
+     * 뷰페이저 적용, 취소리스트저장
+     */
     companion object {
         fun newInstance() = KeepFragment()
         var myCancleList = mutableListOf<String>()
     }
 
+    /**
+     * 앱종료시 데이터 저장
+     */
     override fun onPause() {
         super.onPause()
         saveMyLikeList()
