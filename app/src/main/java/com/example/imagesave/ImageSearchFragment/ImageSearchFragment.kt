@@ -57,6 +57,9 @@ class ImageSearchFragment : Fragment() {
         super.onResume()
     }
 
+    /**
+     * MVVM패턴 적용한부분 옵저빙
+     */
     @SuppressLint("NotifyDataSetChanged")
     private fun initViewModel() =with(viewModel){
         searchParam.observe(viewLifecycleOwner){
@@ -231,7 +234,7 @@ class ImageSearchFragment : Fragment() {
     }
 
     /**
-     * sharedPreferences
+     * 검색어 저장, 불러오기
      */
     private fun saveData() {
         viewModel.saveEditData(requireContext(), binding.searchEdit.text.toString())
