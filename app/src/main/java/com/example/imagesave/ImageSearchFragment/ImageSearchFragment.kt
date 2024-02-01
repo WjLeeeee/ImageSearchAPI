@@ -119,8 +119,8 @@ class ImageSearchFragment : Fragment() {
                 val firstVisibleItemPosition =
                     layoutManager.findFirstVisibleItemPosition() //현재화면에 첫번째로보이는 아이템의 포지션
                 val isLastItemVisible =
-                    firstVisibleItemPosition + visibleItemCount >= totalItemCount //마지막아이템이 화면에 보이는지
-                if (isLastItemVisible) {
+                    firstVisibleItemPosition + visibleItemCount >= totalItemCount -1 //마지막아이템이 화면에 보이는지
+                if (isLastItemVisible && dy > 0) {
                     loadNextPage()
                 }
             }

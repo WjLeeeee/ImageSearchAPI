@@ -21,7 +21,6 @@ class SearchViewModel : ViewModel() {
     private val _loadData: MutableLiveData<String?> = MutableLiveData()
     val loadData: LiveData<String?> get() = _loadData
 
-
     fun setUpParameter(input: String, page: Int) {
         val authKey = "KakaoAK ${Contract.API_KEY}"
         _searchParam.value = hashMapOf(
@@ -55,7 +54,7 @@ class SearchViewModel : ViewModel() {
                 }
             }
 
-            _searchResult.value = items
+            _searchResult.value = _searchResult.value.orEmpty() + items
         }
     }
 
