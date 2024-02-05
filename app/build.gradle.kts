@@ -1,13 +1,8 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("kotlin-parcelize")
 }
-fun getApiKey(propertyKey: String): String{
-    return gradleLocalProperties(rootDir).getProperty(propertyKey)
-}
-
 android {
     namespace = "com.example.imagesave"
     compileSdk = 34
@@ -19,7 +14,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "kakao_api_key", getApiKey("kakao_api_key"))
     }
 
     buildTypes {
